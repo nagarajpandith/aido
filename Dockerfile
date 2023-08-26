@@ -16,6 +16,8 @@ RUN \
     fi
 
 
+
+
 # Rebuild the source code only when needed
 FROM base AS builder
 WORKDIR /app
@@ -26,7 +28,8 @@ COPY . .
 # Learn more here: https://nextjs.org/telemetry
 # Uncomment the following line in case you want to disable telemetry during the build.
 # ENV NEXT_TELEMETRY_DISABLED 1
-
+# generate prisma client
+RUN npx prisma generate
 RUN yarn build
 
 # If using npm comment out above and use below instead
