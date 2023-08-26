@@ -25,6 +25,7 @@ const handler: NextApiHandler = async (req, res) => {
     };
     const speechDetails = await axios.request(options);
     const audio = speechDetails.data;
+
     res.setHeader("Content-Type", "audio/mpeg");
     res.status(200).send(audio);
   }

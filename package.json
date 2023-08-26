@@ -26,6 +26,7 @@
     "axios": "^1.4.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
+    "fluent-ffmpeg": "^2.1.2",
     "leva": "^0.9.35",
     "lucide-react": "^0.269.0",
     "next": "^13.4.2",
@@ -41,6 +42,7 @@
   },
   "devDependencies": {
     "@types/eslint": "^8.37.0",
+    "@types/fluent-ffmpeg": "^2.1.21",
     "@types/node": "^18.16.0",
     "@types/prettier": "^2.7.2",
     "@types/react": "^18.2.6",
