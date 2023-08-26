@@ -34,7 +34,7 @@ export default function Home() {
               />
             )}
           </h1>
-          <Link href={session ? "/chat" : "/api/auth/signin"}>
+          <Link href={session ? "/query" : "/api/auth/signin"}>
             <Button disabled={!session}>
               <MessagesSquare className="mr-2" />
               Chat with Aido

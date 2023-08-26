@@ -33,7 +33,7 @@ export default function Home() {
               </Button>
             </PopoverTrigger>
             <PopoverContent className="mb-2 w-full bg-white dark:bg-slate-900">
-              <Chat />
+              <Chat type="Query"/>
             </PopoverContent>
           </Popover>
         </div>
