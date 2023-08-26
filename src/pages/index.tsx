@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { Button } from "src/components/ui/button";
+import { MainNav } from "~/components/navbar";
 
 export default function Home() {
   return (
@@ -12,8 +12,8 @@ export default function Home() {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="flex min-h-screen flex-col items-center justify-center">
-        <Button>Click me</Button>
+      <main className="flex min-h-screen flex-col">
+        <MainNav/>
       </main>
     </>
   );
