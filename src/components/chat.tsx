@@ -15,12 +15,7 @@ function Chat({ type }: { type: CONVERSATION_TYPE }) {
     }[]
   >([]);
 
-  const [followUp, setFollowUp] = useState<string[]>([
-    "Follow up question 1",
-    "Follow up question 2",
-    "Follow up question 3",
-    "Follow up question 4",
-  ]);
+  const [followUp, setFollowUp] = useState<string[]>([]);
 
   const getAllMessages = api.conversation.getConversation.useQuery();
   const createMessage = api.conversation.createConversation.useMutation({
@@ -75,18 +70,14 @@ function Chat({ type }: { type: CONVERSATION_TYPE }) {
       },
       body: JSON.stringify({
         message,
-        context: "You are a personal intelligent healthcare bot called Aido",
-        history: [
-          {
-            author: "user",
-            message: "Hello, I am having a headache",
-          },
-          {
-            author: "bot",
-            message:
-              "I am sorry to hear that. Can you tell me more about your headache?",
-          },
-        ],
+        context:
+          "You are 'Aido,' a personal intelligent healthcare advisor. Your primary role is to provide accurate and reliable information in response to personal medical queries. You are knowledgeable about various medical topics and can offer advice based on trusted sources. When responding to queries, make sure to cite reliable sources that users can refer to for verification. For example, if a user asks, 'What are some common symptoms of a cold?' you can respond with: 'Hello! Common symptoms of a cold include a runny or stuffy nose, sneezing, sore throat, and mild body aches. You can verify this information from reputable sources such as the Centers for Disease Control and Prevention (CDC) or the Mayo Clinic.' Feel free to use authoritative medical sources such as medical journals, official health organizations, and well-known medical websites to back up your responses. Remember to prioritize accuracy, empathy, and the well-being of the users seeking medical information.",
+        history: messages.map((msg) => {
+          return {
+            author: msg.author,
+            message: msg.message,
+          };
+        }),
       }),
     })
       .then((res) => res.text())
@@ -107,11 +98,10 @@ function Chat({ type }: { type: CONVERSATION_TYPE }) {
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
   };
 
   useEffect(() => {
-    console.log(messages);
     scrollToBottom();
   }, [messages, getAllMessages.isSuccess, createMessage.isSuccess]);
 
