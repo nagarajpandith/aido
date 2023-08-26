@@ -52,17 +52,18 @@ export default function Avatar1(props) {
     headFollow,
     smoothMorphTarget,
     morphTargetSmoothing,
-  } = useControls({
+  } = {
     playAudio: false,
     headFollow: true,
     smoothMorphTarget: true,
     morphTargetSmoothing: 0.5,
     script: {
       value: "speech",
-      options: ["speech", "pizzas"],
+      options: ["speech", "Idle", "Greeting"],
     },
-  });
+  };
   // log morph targets dictionary
+
   const audio = useMemo(() => new Audio(`/${script}.mp3`), [script]);
   const jsonFile = useLoader(THREE.FileLoader, `/lip.json`);
   const lipsync = JSON.parse(jsonFile);
@@ -183,7 +184,7 @@ export default function Avatar1(props) {
   });
 
   return (
-    <group  {...props} dispose={null} ref={group}>
+    <group  {...props.groupConfig} dispose={null} ref={group}>
       <primitive object={nodes.Hips} />
       <skinnedMesh
         name="EyeLeft"

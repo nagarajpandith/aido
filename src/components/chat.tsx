@@ -8,7 +8,13 @@ import { type AUTHOR, type CONVERSATION_TYPE } from "@prisma/client";
 import { setCORS } from "google-translate-api-browser";
 const translate = setCORS("https://cors-proxy.fringe.zone/");
 
-function Chat({ type }: { type: CONVERSATION_TYPE }) {
+function Chat({
+  type,
+  botConversationTrigger,
+}: {
+  type: CONVERSATION_TYPE;
+  botConversationTrigger: (msg: string) => void;
+}) {
   const [message, setMessage] = useState<string>("");
   const [messages, setMessages] = useState<
     {
@@ -81,7 +87,7 @@ function Chat({ type }: { type: CONVERSATION_TYPE }) {
       "You are 'Aido,' a personal intelligent healthcare advisor. Your primary role is to provide accurate and reliable information in response to personal medical queries. You are knowledgeable about various medical topics and can offer advice based on trusted sources. When responding to queries, make sure to cite reliable sources that users can refer to for verification. For example, if a user asks, 'What are some common symptoms of a cold?' you can respond with: 'Hello! Common symptoms of a cold include a runny or stuffy nose, sneezing, sore throat, and mild body aches. You can verify this information from reputable sources such as the Centers for Disease Control and Prevention (CDC) or the Mayo Clinic.' Feel free to use authoritative medical sources such as medical journals, official health organizations, and well-known medical websites to back up your responses. Remember to prioritize accuracy, empathy, and the well-being of the users seeking medical information.";
     const followUpContext =
       "Consider the given chat history of the user and generate a list of possible follow up questions that the current user might come up with. Each item in the list should start with an asterisk.";
-    fetch("http://localhost:8001/query", {
+    fetch("https://vertexai-api-ar2ndw3szq-uc.a.run.app/query", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -115,6 +121,7 @@ function Chat({ type }: { type: CONVERSATION_TYPE }) {
               },
             ]);
         !isFollowUp && createMes(JSON.stringify(text), "bot");
+        !isFollowUp && botConversationTrigger(text);
       })
       .catch((error) => console.error("Error:", error));
   };

@@ -13,7 +13,7 @@ export function MainNav() {
   const { data: session } = useSession();
   return (
     <>
-      <div className="flex justify-between gap-6 px-10 py-3 md:gap-10">
+      <div className="flex justify-between gap-6 bg-white bg-opacity-30 px-10 py-3 backdrop-blur-lg dark:bg-black md:gap-10">
         <Link href="/" className="flex items-center space-x-2">
           <Image src="/logo.png" width={32} height={32} alt="Logo" />
           <span className="font-bold sm:inline-block">Aido</span>
@@ -38,7 +38,7 @@ export function MainNav() {
         </div>
         {showMobileMenu && <MobileNav session={session} />}
       </div>
-      <div className="h-[1px] bg-[#F8515E]"></div>
+      <div className="h-[1px] bg-black opacity-50 dark:bg-[#F8515E]"></div>
     </>
   );
 }
