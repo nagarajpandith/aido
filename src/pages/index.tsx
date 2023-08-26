@@ -1,5 +1,8 @@
 import Head from "next/head";
+import Link from "next/link";
 import { MainNav } from "~/components/navbar";
+import { Button } from "~/components/ui/button";
+import { MessagesSquare } from "lucide-react";
 
 export default function Home() {
   return (
@@ -13,7 +16,15 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="flex min-h-screen flex-col">
-        <MainNav/>
+        <MainNav />
+        <div className="my-auto flex justify-center">
+          <Link href={"/chat"}>
+            <Button>
+              <MessagesSquare className="mr-2" />
+              Chat with Aido
+            </Button>
+          </Link>
+        </div>
       </main>
     </>
   );

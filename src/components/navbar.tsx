@@ -6,6 +6,7 @@ import { ModeToggle } from "./mode-toggle";
 import { Button } from "./ui/button";
 import { GrFormClose } from "react-icons/gr";
 import { signIn, signOut, useSession } from "next-auth/react";
+import { LogIn, LogOut } from "lucide-react";
 
 export function MainNav() {
   const [showMobileMenu, setShowMobileMenu] = React.useState<boolean>(false);
@@ -32,6 +33,11 @@ export function MainNav() {
         <div className="flex items-center space-x-5">
           <Button onClick={session ? () => signOut() : () => signIn("google")}>
             {session ? "Sign Out" : "Sign In"}
+            {session ? (
+              <LogIn className="ml-2" size={18} />
+            ) : (
+              <LogOut className="ml-2" size={18} />
+            )}
           </Button>
           <ModeToggle />
         </div>
