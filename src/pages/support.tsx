@@ -23,7 +23,12 @@ export default function Home() {
       <main className="flex min-h-screen flex-col">
         <MainNav />
         <div className="flex-grow overflow-y-auto p-5">
-          {/* Character Render */}
+          <h1 className="text-center text-3xl font-bold text-gray-900 dark:text-gray-100">
+            Your Personal Mental Health Support
+          </h1>
+          <p className="text-center text-md font-light text-gray-900 dark:text-gray-100">
+            Offering Coping Strategies, Relaxation Techniques, and Companionship
+          </p>
         </div>
         <div className="fixed bottom-4 right-4">
           <Popover>

@@ -23,7 +23,12 @@ export default function Home() {
       <main className="flex min-h-screen flex-col">
         <MainNav />
         <div className="flex-grow overflow-y-auto p-5">
-          {/* Character Render */}
+          <h1 className="text-center text-xl font-bold text-gray-900 dark:text-gray-100 lg:text-3xl">
+            Your Reliable Medical Query Assistant
+          </h1>
+          <p className="lg:text-md text-center text-xs font-light text-gray-900 dark:text-gray-100">
+            Providing Accurate Answers and Citing Trusted Source
+          </p>
         </div>
         <div className="fixed bottom-4 right-4">
           <Popover>
@@ -33,7 +38,7 @@ export default function Home() {
               </Button>
             </PopoverTrigger>
             <PopoverContent className="mb-2 w-full bg-white dark:bg-slate-900">
-              <Chat type="Query"/>
+              <Chat type="Query" />
             </PopoverContent>
           </Popover>
         </div>

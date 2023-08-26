@@ -52,6 +52,8 @@ model User {
   age           Int?
   height        Float?
   weight        Float?
+  languageSpeak String?
+  languageText  String?
   gender        GENDER?
   HealthRecord  HealthRecord[]
   Goals         Goals[]
