@@ -34,12 +34,21 @@ export default function Home() {
               />
             )}
           </h1>
-          <Link href={session ? "/query" : "/api/auth/signin"}>
-            <Button disabled={!session}>
-              <MessagesSquare className="mr-2" />
-              Chat with Aido
-            </Button>
-          </Link>
+          <div className="space-x-5">
+            <Link href={session ? "/query" : "/api/auth/signin"}>
+              <Button disabled={!session}>
+                <MessagesSquare className="mr-2" />
+                Ask Aido
+              </Button>
+            </Link>
+
+            <Link href={session ? "/support" : "/api/auth/signin"}>
+              <Button disabled={!session}>
+                <MessagesSquare className="mr-2" />
+                Talk to Aido
+              </Button>
+            </Link>
+          </div>
         </div>
       </main>
     </>

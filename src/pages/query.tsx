@@ -27,7 +27,7 @@ export default function Home() {
         </div>
         <div className="fixed bottom-4 right-4">
           <Popover>
-            <PopoverTrigger>
+            <PopoverTrigger asChild>
               <Button>
                 <MessageSquare className="mr-2 h-5 w-5" /> Text Aido
               </Button>
