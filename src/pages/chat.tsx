@@ -1,37 +1,15 @@
 import Head from "next/head";
 import { MainNav } from "~/components/navbar";
-import { SendHorizontal } from "lucide-react";
+import Chat from "~/components/chat";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "src/components/ui/popover";
 import { Button } from "~/components/ui/button";
-import { useState } from "react";
-import { Textarea } from "~/components/ui/textarea";
-
-interface Message {
-  author: string;
-  content: string;
-  timestamp: string;
-}
+import { MessageSquare } from "lucide-react";
 
 export default function Home() {
-  const [message, setMessage] = useState<string>("");
-  const [messages, setMessages] = useState<Message[]>([]);
-
-  const addMessage = (author: string, content: string) => {
-    const newMessage: Message = {
-      author,
-      content,
-      timestamp: new Date().toISOString(),
-    };
-    setMessages((prevMessages) => [...prevMessages, newMessage]);
-  };
-
-  const sendDummyMessage = (message: string) => {
-    addMessage("user", message);
-    setMessage("");
-    setTimeout(() => {
-      addMessage("bot", "I'm here to help!");
-    }, 500);
-  };
-
   return (
     <>
       <Head>
@@ -45,58 +23,19 @@ export default function Home() {
       <main className="flex min-h-screen flex-col">
         <MainNav />
         <div className="flex-grow overflow-y-auto p-5">
-          <div className="mb-4 text-gray-600">
-            {messages.map((msg, index) => (
-              <div
-                key={index}
-                className={`flex justify-${
-                  msg.author === "user" ? "end" : "start"
-                } mt-2`}
-              >
-                <div
-                  className={`${
-                    msg.author === "user"
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-200 text-gray-800"
-                  } max-w-md rounded-lg p-2`}
-                  dangerouslySetInnerHTML={{
-                    __html: msg.content.replace(/\n/g, "<br />"),
-                  }}
-                ></div>
-              </div>
-            ))}
-          </div>
-
-          <div className="fixed bottom-0 left-0 w-full border-t  p-5">
-            <div className="flex items-center">
-              <Textarea
-                placeholder="Type your message here"
-                className="mr-2 rounded-l-lg border py-2 pr-10"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                onKeyDown={(e) => {
-                  if (
-                    e.key === "Enter" &&
-                    !e.shiftKey &&
-                    message.trim() !== ""
-                  ) {
-                    e.preventDefault();
-                    sendDummyMessage(message);
-                  }
-                }}
-              />
-              <Button
-                onClick={() => {
-                  if (message.trim() !== "") {
-                    sendDummyMessage(message);
-                  }
-                }}
-                disabled={message.length === 0}
-              >
-                <SendHorizontal className="h-5 w-5" />
+          {/* Character Render */}
+        </div>
+        <div className="fixed bottom-4 right-4">
+          <Popover>
+            <PopoverTrigger>
+              <Button>
+                <MessageSquare className="mr-2 h-5 w-5" /> Text Aido
               </Button>
-            </div>
-          </div>
+            </PopoverTrigger>
+            <PopoverContent className="mb-2 w-full bg-white dark:bg-slate-900">
+              <Chat />
+            </PopoverContent>
+          </Popover>
         </div>
       </main>
     </>
