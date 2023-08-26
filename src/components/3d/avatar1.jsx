@@ -1,12 +1,57 @@
-import React, { useRef } from "react";
-// @ts-ignore
-import { useAnimations, useGLTF } from "@react-three/drei";
+// @ts-nocheck
 
-// @ts-ignore
+
+import React, { useEffect, useRef, useState } from "react";
+import { useAnimations, useFBX, useGLTF } from "@react-three/drei";
+import { useFrame } from "@react-three/fiber";
+import { useControls } from "leva";
+
 export default function Avatar1(props) {
-  // @ts-ignore
+
   const { nodes, materials } = useGLTF("/assets/models/avatar1.glb");
+  const { animations: idleAnimation } = useFBX("/assets/animations/idle2.fbx");
+  const { animations: greetingAnimation } = useFBX(
+    "/assets/animations/greeting.fbx"
+  );
+  const { animations: talkingAnimation } = useFBX("/assets/animations/talking.fbx");
+  idleAnimation[0].name = "Idle";
+  talkingAnimation[0].name = "Angry";
+  greetingAnimation[0].name = "Greeting";
+  const [animation, setAnimation] = useState("Idle");
+
   const group = useRef();
+  const { actions } = useAnimations(
+    [idleAnimation[0], talkingAnimation[0], greetingAnimation[0]],
+    group
+  );
+  useEffect(() => {
+    actions[animation].reset().fadeIn(0.5).play();
+    return () => actions[animation].fadeOut(0.5);
+  }, [animation]);
+
+  const {
+    playAudio,
+    script,
+    headFollow,
+    smoothMorphTarget,
+    morphTargetSmoothing,
+  } = useControls({
+    playAudio: false,
+    headFollow: true,
+    smoothMorphTarget: true,
+    morphTargetSmoothing: 0.5,
+    script: {
+      value: "welcome",
+      options: ["welcome", "pizzas"],
+    },
+  });
+
+  useFrame((state) => {
+    if (headFollow) {
+      group.current.getObjectByName("Head").lookAt(state.camera.position);
+    }
+  });
+
   return (
     <group  {...props} dispose={null} ref={group}>
       <primitive object={nodes.Hips} />
