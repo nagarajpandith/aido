@@ -1,0 +1,17 @@
+image: docker:latest
+
+services:
+  - docker:dind
+
+before_script:
+  - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+
+deploy:
+  image: google/cloud-sdk:latest
+  script:
+    - gcloud auth activate-service-account --key-file=google-creds.json
+    - gcloud config set project $PROJECT_ID
+    - gcloud builds submit --tag gcr.io/$PROJECT_ID/$CI_PROJECT_NAME:$CI_COMMIT_SHA
+    - gcloud run deploy --image=gcr.io/$PROJECT_ID/$CI_PROJECT_NAME:$CI_COMMIT_SHA --platform=managed --region=$CLOUD_RUN_REGION --allow-unauthenticated --update-env-vars=VAR1=value1,VAR2=value2 --quiet
+  only:
+    - master
