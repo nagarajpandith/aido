@@ -122,7 +122,10 @@ function Chat({ type }: { type: CONVERSATION_TYPE }) {
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
+    if (messagesEndRef.current)
+      (messagesEndRef.current as HTMLDivElement).scrollIntoView({
+        behavior: "smooth",
+      });
   };
 
   useEffect(() => {
