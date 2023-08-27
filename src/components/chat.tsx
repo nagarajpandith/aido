@@ -50,7 +50,7 @@ function Chat({ type }: { type: CONVERSATION_TYPE }) {
     });
   };
 
-  const handleFollowUpClick = (followUpText: string) => {
+  const handleFollowUpClick = async (followUpText: string) => {
     setMessages((prev) => [
       ...prev,
       {
@@ -59,18 +59,33 @@ function Chat({ type }: { type: CONVERSATION_TYPE }) {
         message: followUpText,
       },
     ]);
-    sendToApi({ message: followUpText, isFollowUp: false });
+    await sendToApi({ message: followUpText, isFollowUp: false });
     setMessage(followUpText);
     createMes(followUpText, "user");
     setFollowUp([]);
-    sendToApi({
+    await sendToApi({
       message:
         "generate a list of possible follow up questions that the current user might come up with. Each item in the list should start with an asterisk.",
       isFollowUp: true,
     });
   };
 
-  const sendToApi = ({
+  const handleSendToApi = async () => {
+    try {
+      await sendToApi({ message, isFollowUp: false });
+
+      await sendToApi({
+        message:
+          "for the below message what can be the follow-up questions, give a list of possible questions that a user might come up with. Each item in the list should start with an asterisk." +
+          messages[messages.length - 1]!.message,
+        isFollowUp: true,
+      });
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  const sendToApi = async ({
     message,
     isFollowUp,
   }: {
@@ -80,43 +95,49 @@ function Chat({ type }: { type: CONVERSATION_TYPE }) {
     const context =
       "You are 'Aido,' a personal intelligent healthcare advisor. Your primary role is to provide accurate and reliable information in response to personal medical queries. You are knowledgeable about various medical topics and can offer advice based on trusted sources. When responding to queries, make sure to cite reliable sources that users can refer to for verification. For example, if a user asks, 'What are some common symptoms of a cold?' you can respond with: 'Hello! Common symptoms of a cold include a runny or stuffy nose, sneezing, sore throat, and mild body aches. You can verify this information from reputable sources such as the Centers for Disease Control and Prevention (CDC) or the Mayo Clinic.' Feel free to use authoritative medical sources such as medical journals, official health organizations, and well-known medical websites to back up your responses. Remember to prioritize accuracy, empathy, and the well-being of the users seeking medical information.";
     const followUpContext =
-      "Consider the given chat history of the user and generate a list of possible follow up questions that the current user might come up with. Each item in the list should start with an asterisk.";
-    fetch("http://localhost:8001/query", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        message,
-        context: isFollowUp ? followUpContext : context,
-        history: messages.map((msg) => {
-          return {
-            author: msg.author,
-            message: msg.message,
-          };
+      "Consider the previous question asked by the user and generate a list of possible follow-up questions that the current user might come up with. Each item in the list should start with an asterisk.";
+
+    try {
+      const response = await fetch("http://localhost:8001/query", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message,
+          context: isFollowUp ? followUpContext : context,
+          history: messages.map((msg) => {
+            return {
+              author: msg.author,
+              message: msg.message,
+            };
+          }),
         }),
-      }),
-    })
-      .then((res) => res.text())
-      .then((text) => {
-        isFollowUp
-          ? setFollowUp(
-              text
-                .trim()
-                .split("\n")
-                .map((question) => question.trim().substring(2))
-            )
-          : setMessages((prev) => [
-              ...prev,
-              {
-                type,
-                author: "bot",
-                message: text,
-              },
-            ]);
-        !isFollowUp && createMes(JSON.stringify(text), "bot");
-      })
-      .catch((error) => console.error("Error:", error));
+      });
+
+      const text = await response.text();
+
+      if (isFollowUp) {
+        setFollowUp(
+          text
+            .trim()
+            .split("\n")
+            .map((question) => question.trim().substring(2))
+        );
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          {
+            type,
+            author: "bot",
+            message: text,
+          },
+        ]);
+        createMes(JSON.stringify(text), "bot");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
   };
 
   const messagesEndRef = useRef(null);
@@ -124,7 +145,7 @@ function Chat({ type }: { type: CONVERSATION_TYPE }) {
   const scrollToBottom = () => {
     if (messagesEndRef.current)
       (messagesEndRef.current as HTMLDivElement).scrollIntoView({
-        behavior: "smooth",
+        behavior: "auto",
       });
   };
 
@@ -196,7 +217,7 @@ function Chat({ type }: { type: CONVERSATION_TYPE }) {
 
   useEffect(() => {
     if (isRecording) {
-      console.log(transcript,"dusfh");
+      console.log(transcript, "dusfh");
 
       setMessage("");
       // eslint-disable-next-line
@@ -270,7 +291,7 @@ function Chat({ type }: { type: CONVERSATION_TYPE }) {
             className="mr-2 rounded-l-lg border py-2 pr-10"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={(e) => {
+            onKeyDown={async (e) => {
               if (e.key === "Enter" && !e.shiftKey && message.trim() !== "") {
                 e.preventDefault();
                 setMessages((prev) => [
@@ -282,12 +303,7 @@ function Chat({ type }: { type: CONVERSATION_TYPE }) {
                   },
                 ]);
                 createMes(message, "user");
-                sendToApi({ message, isFollowUp: false });
-                sendToApi({
-                  message:
-                    "Generate an array of strings consisting of possible follow up questions by the user.",
-                  isFollowUp: true,
-                });
+                await handleSendToApi();
               }
             }}
           />
@@ -314,7 +330,7 @@ function Chat({ type }: { type: CONVERSATION_TYPE }) {
               )}
             </Button>
             <Button
-              onClick={() => {
+              onClick={async() => {
                 if (message.trim() !== "") {
                   setMessages((prev) => [
                     ...prev,
@@ -325,7 +341,7 @@ function Chat({ type }: { type: CONVERSATION_TYPE }) {
                     },
                   ]);
                   createMes(message, "user");
-                  sendToApi({ message, isFollowUp: false });
+                  await sendToApi({ message, isFollowUp: false });
                 }
               }}
               disabled={
