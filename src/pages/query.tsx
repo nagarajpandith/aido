@@ -69,7 +69,7 @@ export default function Home() {
         setMessageQueue((prev) => prev.slice(1));
       });
     }
-  }, [messageQueue]);
+  }, [messageQueue, currentMessage]);
 
   return (
     <>
@@ -90,7 +90,7 @@ export default function Home() {
             {/* @ts-ignore */}
             <Avatar currentMessage={currentMessage} groupConfig={groupConfig} />
             <Environment preset="apartment" />
-            <Scean />
+            <Scene />
           </Canvas>
         </div>
         <div className="absolute left-0 top-0 w-full">
@@ -110,7 +110,7 @@ export default function Home() {
                   <MessageSquare className="mr-2 h-5 w-5" /> Text Aido
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="mb-2 w-full bg-white dark:bg-slate-900/70 bg-opacity-60 backdrop-filter backdrop-blur-sm">
+              <PopoverContent className="mb-2 w-full bg-white bg-opacity-60 backdrop-blur-sm backdrop-filter dark:bg-slate-900/70">
                 <Chat
                   type="Query"
                   botConversationTrigger={botConversationTrigger}
@@ -124,7 +124,7 @@ export default function Home() {
   );
 }
 
-const Scean = () => {
+const Scene = () => {
   const viewport = useThree((state) => state.viewport);
   const texture = useTexture("/assets/textures/background1.jpg");
   return (

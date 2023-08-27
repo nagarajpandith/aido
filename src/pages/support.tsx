@@ -11,7 +11,7 @@ import { MessageSquare } from "lucide-react";
 import { Canvas } from "@react-three/fiber";
 import { Environment, OrbitControls, useTexture } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
-import Avatar from "src/components/3d/avatar1";
+import Avatar from "src/components/3d/avatar2";
 import axios from "axios";
 import { useEffect, useState } from "react";
 interface MessageQueue {
@@ -25,7 +25,7 @@ export default function Home() {
   };
   const [messageQueue, setMessageQueue] = useState<MessageQueue[]>([]);
   const botConversationTrigger = async (msg: string) => {
-    const url = `/api/speech?text=${encodeURIComponent(msg)}`;
+    const url = `/api/speech?text=${encodeURIComponent(msg)}&gender=f`;
     const blob = await (await fetch(url)).blob();
     const audio = new Audio(URL.createObjectURL(blob));
     const formData = new FormData();
@@ -90,7 +90,7 @@ export default function Home() {
             {/* @ts-ignore */}
             <Avatar currentMessage={currentMessage} groupConfig={groupConfig} />
             <Environment preset="apartment" />
-            <Scean />
+            <Scene />
           </Canvas>
         </div>
         <div className="absolute left-0 top-0 w-full">
@@ -125,9 +125,9 @@ export default function Home() {
   );
 }
 
-const Scean = () => {
+const Scene = () => {
   const viewport = useThree((state) => state.viewport);
-  const texture = useTexture("/assets/textures/background1.jpg");
+  const texture = useTexture("/assets/textures/background2.jpg");
   return (
     <mesh>
       <planeGeometry args={[viewport.width, viewport.height]} />

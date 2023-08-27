@@ -5,9 +5,10 @@ import { env } from "~/env.mjs";
 const handler: NextApiHandler = async (req, res) => {
   const { method } = req;
   if (method === "GET") {
-    const { text } = req.query;
+    const { text, gender } = req.query;
     const API_KEY = env.ELEVENLABS_API_KEY;
-    const VOICE_ID = "GBv7mTt0atIp3Br8iCZE";
+    const VOICE_ID =
+      gender == "f" ? "EXAVITQu4vr4xnSDxMaL" : "GBv7mTt0atIp3Br8iCZE";
 
     // Set options for the API request.
     const options: AxiosRequestConfig = {
