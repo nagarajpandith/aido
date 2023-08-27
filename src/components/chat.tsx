@@ -14,9 +14,6 @@ import {
   SelectValue,
 } from "src/components/ui/select";
 
-import { setCORS } from "google-translate-api-browser";
-const translate = setCORS("https://cors-proxy.fringe.zone/");
-
 function Chat({
   type,
   botConversationTrigger,
@@ -100,6 +97,27 @@ function Chat({
     }
   };
 
+  const translateText = async (text: string) => {
+    try {
+      const response = await fetch(
+        `https://vertexai-api-ar2ndw3szq-uc.a.run.app/translate`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            message: text,
+            language: selectedLanguage,
+          }),
+        }
+      );
+      return await response.text();
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
   const sendToApi = async ({
     message,
     isFollowUp,
@@ -108,7 +126,7 @@ function Chat({
     isFollowUp: boolean;
   }) => {
     const context =
-      "You are 'Aido,' a personal intelligent healthcare advisor. Your primary role is to provide accurate and reliable information in response to personal medical queries. You are knowledgeable about various medical topics and can offer advice based on trusted sources. When responding to queries, make sure to cite reliable sources that users can refer to for verification. For example, if a user asks, 'What are some common symptoms of a cold?' you can respond with: 'Hello! Common symptoms of a cold include a runny or stuffy nose, sneezing, sore throat, and mild body aches. You can verify this information from reputable sources such as the Centers for Disease Control and Prevention (CDC) or the Mayo Clinic.' Feel free to use authoritative medical sources such as medical journals, official health organizations, and well-known medical websites to back up your responses. Remember to prioritize accuracy, empathy, and the well-being of the users seeking medical information.";
+      "You are 'Aido', a personal intelligent healthcare advisor. Your primary role is to provide accurate and reliable information in response to personal medical queries. You are knowledgeable about various medical topics and can offer advice based on trusted sources. When responding to queries, make sure to cite reliable sources that users can refer to for verification. For example, if a user asks, 'What are some common symptoms of a cold?' you can respond with: 'Hello! Common symptoms of a cold include a runny or stuffy nose, sneezing, sore throat, and mild body aches. You can verify this information from reputable sources such as the Centers for Disease Control and Prevention (CDC) or the Mayo Clinic.' Feel free to use authoritative medical sources such as medical journals, official health organizations, and well-known medical websites to back up your responses. Remember to prioritize accuracy, empathy, and the well-being of the users seeking medical information.";
     const followUpContext =
       "Consider the previous question asked by the user and generate a list of possible follow-up questions that the current user might come up with. Each item in the list should start with an asterisk.";
 
@@ -136,23 +154,25 @@ function Chat({
       const text = await response.text();
 
       if (isFollowUp) {
+        const translated = await translateText(text);
         setFollowUp(
-          text
+          translated!
             .trim()
             .split("\n")
             .map((question) => question.trim().substring(2))
         );
       } else {
+        const translatedText = await translateText(text);
         setMessages((prev) => [
           ...prev,
           {
             type,
             author: "bot",
-            message: text,
+            message: JSON.stringify(translatedText)!,
           },
         ]);
-        botConversationTrigger(text);
-        createMes(JSON.stringify(text), "bot");
+        botConversationTrigger(JSON.stringify(translatedText)!);
+        createMes(JSON.stringify(translatedText), "bot");
       }
     } catch (error) {
       console.error("Error:", error);
@@ -250,6 +270,12 @@ function Chat({
   }, [isRecording]);
 
   const changeLang = api.user.changeLanguage.useMutation();
+  const getLang = api.user.getLanguage.useQuery();
+  useEffect(() => {
+    if (getLang.isSuccess) {
+      setSelectedLanguage(getLang.data as "en-US" | "hi" | "ja");
+    }
+  }, [getLang.isSuccess]);
 
   return (
     <div className="w-[300px] max-w-xl flex-grow overflow-hidden p-1 lg:w-[400px]">
