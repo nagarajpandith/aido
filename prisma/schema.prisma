@@ -52,8 +52,8 @@ model User {
   age           Int?
   height        Float?
   weight        Float?
-  languageSpeak String?
-  languageText  String?
+  languageSpeak String?        @default("en-US")
+  languageText  String?        @default("en-US")
   gender        GENDER?
   HealthRecord  HealthRecord[]
   Goals         Goals[]

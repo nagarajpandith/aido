@@ -110,7 +110,7 @@ export default function Home() {
                   <MessageSquare className="mr-2 h-5 w-5" /> Text Aido
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="mb-2 w-full bg-white dark:bg-slate-900">
+              <PopoverContent className="mb-2 w-full bg-white dark:bg-slate-900/70 bg-opacity-60 backdrop-filter backdrop-blur-sm">
                 <Chat
                   type="Query"
                   botConversationTrigger={botConversationTrigger}

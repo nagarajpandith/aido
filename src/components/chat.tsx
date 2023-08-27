@@ -4,6 +4,15 @@ import { useEffect, useRef, useState } from "react";
 import { Textarea } from "~/components/ui/textarea";
 import { api } from "~/utils/api";
 import { type AUTHOR, type CONVERSATION_TYPE } from "@prisma/client";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "src/components/ui/select";
 
 import { setCORS } from "google-translate-api-browser";
 const translate = setCORS("https://cors-proxy.fringe.zone/");
@@ -165,7 +174,9 @@ function Chat({
 
   const socketRef = useRef<WebSocket | null>(null);
   const [isRecording, setIsRecording] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState("en-US");
+  const [selectedLanguage, setSelectedLanguage] = useState<
+    "en-US" | "hi" | "ja"
+  >("en-US");
   const [transcript, setTranscript] = useState<string[]>([]);
   [];
 
@@ -183,8 +194,7 @@ function Chat({
         const webSocketUrl =
           selectedLanguage === "en-US"
             ? "wss://api.deepgram.com/v1/listen?model=nova"
-            : `wss://api.deepgram.com/v1/listen?language=${selectedLanguage}` +
-              selectedLanguage;
+            : `wss://api.deepgram.com/v1/listen?language=${selectedLanguage}`;
 
         const socket = new WebSocket(webSocketUrl, [
           "token",
@@ -239,14 +249,17 @@ function Chat({
     }
   }, [isRecording]);
 
+  const changeLang = api.user.changeLanguage.useMutation();
+
   return (
     <div className="w-[300px] max-w-xl flex-grow overflow-hidden p-1 lg:w-[400px]">
-      <div className="mb-4 h-96 overflow-y-auto bg-white text-gray-600 dark:bg-slate-900">
+      <div className="mb-4 h-96 overflow-y-auto bg-opacity-50 text-gray-600">
         {(getAllMessages.isLoading || createMessage.isLoading) && (
           <div className="flex h-full items-center justify-center">
             <div className="h-32 w-32 animate-spin rounded-full border-b-2 border-t-2 border-gray-900 dark:border-gray-100"></div>
           </div>
         )}
+
         {!(getAllMessages.isLoading || createMessage.isLoading) &&
           messages
             .filter((msg) => msg.type === type)
@@ -273,7 +286,7 @@ function Chat({
       </div>
 
       {followUp.length != 0 && (
-        <div className="no-scrollbar overflow-x-auto whitespace-nowrap border-t bg-white py-3 dark:bg-slate-900">
+        <div className="no-scrollbar overflow-x-auto whitespace-nowrap border-t py-3">
           {followUp.map((followUpText, index) => (
             <span
               key={index}
@@ -286,7 +299,7 @@ function Chat({
         </div>
       )}
 
-      <div className="border-t bg-white py-3 dark:bg-slate-900">
+      <div className="border-t py-3 ">
         <div className="flex items-center">
           <Textarea
             style={{
@@ -364,6 +377,28 @@ function Chat({
             </Button>
           </div>
         </div>
+        <Select
+          value={selectedLanguage}
+          onValueChange={(value) => {
+            setSelectedLanguage(value as "en-US" | "hi" | "ja");
+            changeLang.mutate({
+              language: value as "en-US" | "hi" | "ja",
+            });
+          }}
+          disabled={changeLang.isLoading}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Select a Language" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectLabel>Language</SelectLabel>
+              <SelectItem value="en-US">English</SelectItem>
+              <SelectItem value="hi">Hindi</SelectItem>
+              <SelectItem value="ja">Japanese</SelectItem>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
       </div>
     </div>
   );
