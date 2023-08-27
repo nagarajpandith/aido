@@ -105,7 +105,7 @@ function Chat({
 
     try {
       const response = await fetch(
-        `https://vertexai-api-ar2ndw3szq-uc.a.run.app/${type}`,
+        `https://vertexai-api-ar2ndw3szq-uc.a.run.app/${type.toLowerCase()}`,
         {
           method: "POST",
           headers: {
@@ -142,6 +142,7 @@ function Chat({
             message: text,
           },
         ]);
+        botConversationTrigger(text);
         createMes(JSON.stringify(text), "bot");
       }
     } catch (error) {

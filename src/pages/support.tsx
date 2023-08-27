@@ -38,7 +38,7 @@ export default function Home() {
               </Button>
             </PopoverTrigger>
             <PopoverContent className="mb-2 w-full bg-white dark:bg-slate-900">
-              <Chat type="Support" />
+              <Chat type="Support"  />
             </PopoverContent>
           </Popover>
         </div>
