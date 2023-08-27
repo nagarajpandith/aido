@@ -1,6 +1,5 @@
 // @ts-nocheck
 
-
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useAnimations, useFBX, useGLTF } from "@react-three/drei";
 import { useFrame, useLoader } from "@react-three/fiber";
@@ -19,15 +18,14 @@ const corresponding = {
 };
 
 export default function Avatar1(props) {
-
-
-
   const { nodes, materials } = useGLTF("/assets/models/avatar1.glb");
   const { animations: idleAnimation } = useFBX("/assets/animations/idle2.fbx");
   const { animations: greetingAnimation } = useFBX(
     "/assets/animations/greeting.fbx"
   );
-  const { animations: talkingAnimation } = useFBX("/assets/animations/talking.fbx");
+  const { animations: talkingAnimation } = useFBX(
+    "/assets/animations/talking.fbx"
+  );
   idleAnimation[0].name = "Idle";
   talkingAnimation[0].name = "Speech";
   greetingAnimation[0].name = "Greeting";
@@ -39,8 +37,9 @@ export default function Avatar1(props) {
     group
   );
   useEffect(() => {
+    if (!actions[animation]) return;
     actions[animation].reset().fadeIn(0.5).play();
-    return () => actions[animation].fadeOut(0.5);
+    return () => actions[animation]?.fadeOut(0.5);
   }, [animation]);
   useEffect(() => {
     console.log(nodes.Wolf3D_Head.morphTargetDictionary);
@@ -50,16 +49,10 @@ export default function Avatar1(props) {
     if (props.currentMessage?.audio && !props.currentMessage.audio.ended) {
       setPlayAudio(true);
     } else {
-
       setPlayAudio(false);
     }
   }, [props.currentMessage?.audio]);
-  const {
-    script,
-    headFollow,
-    smoothMorphTarget,
-    morphTargetSmoothing,
-  } = {
+  const { script, headFollow, smoothMorphTarget, morphTargetSmoothing } = {
     playAudio: true,
     headFollow: true,
     smoothMorphTarget: true,
@@ -69,7 +62,7 @@ export default function Avatar1(props) {
       options: ["speech", "Idle", "Greeting"],
     },
   };
-  console.log(props.currentMessage)
+  console.log(props.currentMessage);
   const audio = props.currentMessage?.audio;
   const lipsync = props.currentMessage?.lipSync;
   useFrame(() => {
@@ -96,7 +89,7 @@ export default function Avatar1(props) {
           nodes.Wolf3D_Head.morphTargetDictionary[value]
         ] = THREE.MathUtils.lerp(
           nodes.Wolf3D_Head.morphTargetInfluences[
-          nodes.Wolf3D_Head.morphTargetDictionary[value]
+            nodes.Wolf3D_Head.morphTargetDictionary[value]
           ],
           0,
           morphTargetSmoothing
@@ -106,7 +99,7 @@ export default function Avatar1(props) {
           nodes.Wolf3D_Teeth.morphTargetDictionary[value]
         ] = THREE.MathUtils.lerp(
           nodes.Wolf3D_Teeth.morphTargetInfluences[
-          nodes.Wolf3D_Teeth.morphTargetDictionary[value]
+            nodes.Wolf3D_Teeth.morphTargetDictionary[value]
           ],
           0,
           morphTargetSmoothing
@@ -123,37 +116,37 @@ export default function Avatar1(props) {
         if (!smoothMorphTarget) {
           nodes.Wolf3D_Head.morphTargetInfluences[
             nodes.Wolf3D_Head.morphTargetDictionary[
-            corresponding[mouthCue.value]
+              corresponding[mouthCue.value]
             ]
           ] = 1;
           nodes.Wolf3D_Teeth.morphTargetInfluences[
             nodes.Wolf3D_Teeth.morphTargetDictionary[
-            corresponding[mouthCue.value]
+              corresponding[mouthCue.value]
             ]
           ] = 1;
         } else {
           nodes.Wolf3D_Head.morphTargetInfluences[
             nodes.Wolf3D_Head.morphTargetDictionary[
-            corresponding[mouthCue.value]
+              corresponding[mouthCue.value]
             ]
           ] = THREE.MathUtils.lerp(
             nodes.Wolf3D_Head.morphTargetInfluences[
-            nodes.Wolf3D_Head.morphTargetDictionary[
-            corresponding[mouthCue.value]
-            ]
+              nodes.Wolf3D_Head.morphTargetDictionary[
+                corresponding[mouthCue.value]
+              ]
             ],
             1,
             morphTargetSmoothing
           );
           nodes.Wolf3D_Teeth.morphTargetInfluences[
             nodes.Wolf3D_Teeth.morphTargetDictionary[
-            corresponding[mouthCue.value]
+              corresponding[mouthCue.value]
             ]
           ] = THREE.MathUtils.lerp(
             nodes.Wolf3D_Teeth.morphTargetInfluences[
-            nodes.Wolf3D_Teeth.morphTargetDictionary[
-            corresponding[mouthCue.value]
-            ]
+              nodes.Wolf3D_Teeth.morphTargetDictionary[
+                corresponding[mouthCue.value]
+              ]
             ],
             1,
             morphTargetSmoothing
@@ -184,10 +177,8 @@ export default function Avatar1(props) {
       if (audio) {
         audio.pause();
       }
-
     }
   }, [playAudio, script]);
-
 
   useFrame((state) => {
     if (headFollow) {
@@ -196,7 +187,7 @@ export default function Avatar1(props) {
   });
 
   return (
-    <group  {...props.groupConfig} dispose={null} ref={group}>
+    <group {...props.groupConfig} dispose={null} ref={group}>
       <primitive object={nodes.Hips} />
       <skinnedMesh
         name="EyeLeft"
