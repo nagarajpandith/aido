@@ -1,4 +1,4 @@
-import { Mic, SendHorizontal } from "lucide-react";
+import { Mic, SendHorizontal, X } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { useEffect, useRef, useState } from "react";
 import { Textarea } from "~/components/ui/textarea";
@@ -133,8 +133,10 @@ function Chat({ type }: { type: CONVERSATION_TYPE }) {
   }, [messages, getAllMessages.isSuccess, createMessage.isSuccess]);
 
   const socketRef = useRef<WebSocket | null>(null);
-
+  const [isRecording, setIsRecording] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState("en-US");
+  const [transcript, setTranscript] = useState<string[]>([]);
+  [];
 
   async function transcribe() {
     console.log("Started transcription");
@@ -148,9 +150,10 @@ function Chat({ type }: { type: CONVERSATION_TYPE }) {
         });
 
         const webSocketUrl =
-          selectedLanguage == "en-US"
+          selectedLanguage === "en-US"
             ? "wss://api.deepgram.com/v1/listen?model=nova"
-            : `wss://api.deepgram.com/v1/listen?language=${selectedLanguage}`;
+            : `wss://api.deepgram.com/v1/listen?language=${selectedLanguage}` +
+              selectedLanguage;
 
         const socket = new WebSocket(webSocketUrl, [
           "token",
@@ -171,7 +174,12 @@ function Chat({ type }: { type: CONVERSATION_TYPE }) {
           const received = message && JSON.parse(message?.data as string);
           const transcript = received.channel?.alternatives[0]
             .transcript as string;
-          console.log(transcript);
+          setTranscript((prev) => {
+            if (!prev.some((item) => item === transcript)) {
+              return [...prev, transcript];
+            }
+            return prev;
+          });
         };
 
         socket.onclose = () => {
@@ -185,6 +193,20 @@ function Chat({ type }: { type: CONVERSATION_TYPE }) {
         socketRef.current = socket;
       });
   }
+
+  useEffect(() => {
+    if (isRecording) {
+      console.log(transcript,"dusfh");
+
+      setMessage("");
+      // eslint-disable-next-line
+      transcribe();
+    } else {
+      console.log(transcript);
+      setMessage(transcript.join(" "));
+      setTranscript([]);
+    }
+  }, [isRecording]);
 
   return (
     <div className="w-[300px] max-w-xl flex-grow overflow-hidden p-1 lg:w-[400px]">
@@ -270,13 +292,26 @@ function Chat({ type }: { type: CONVERSATION_TYPE }) {
             }}
           />
           <div className="flex flex-col space-y-1">
-            <Button>
-              <Mic
-                className="h-5 w-5"
-                onClick={async () => {
-                  await transcribe();
-                }}
-              />
+            <Button
+              onClick={async () => {
+                if (isRecording) {
+                  socketRef.current?.close(),
+                    await navigator.mediaDevices
+                      .getUserMedia({ audio: true })
+                      .then((stream) => {
+                        stream.getTracks().forEach((track) => track.stop());
+                      });
+                  setIsRecording(false);
+                } else {
+                  setIsRecording(true);
+                }
+              }}
+            >
+              {isRecording ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Mic className="h-5 w-5" />
+              )}
             </Button>
             <Button
               onClick={() => {
