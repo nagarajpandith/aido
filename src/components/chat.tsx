@@ -1,4 +1,4 @@
-import { Mic, SendHorizontal } from "lucide-react";
+import { Mic, SendHorizontal, X } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { useEffect, useRef, useState } from "react";
 import { Textarea } from "~/components/ui/textarea";
@@ -56,7 +56,7 @@ function Chat({
     });
   };
 
-  const handleFollowUpClick = (followUpText: string) => {
+  const handleFollowUpClick = async (followUpText: string) => {
     setMessages((prev) => [
       ...prev,
       {
@@ -65,18 +65,33 @@ function Chat({
         message: followUpText,
       },
     ]);
-    sendToApi({ message: followUpText, isFollowUp: false });
+    await sendToApi({ message: followUpText, isFollowUp: false });
     setMessage(followUpText);
     createMes(followUpText, "user");
     setFollowUp([]);
-    sendToApi({
+    await sendToApi({
       message:
         "generate a list of possible follow up questions that the current user might come up with. Each item in the list should start with an asterisk.",
       isFollowUp: true,
     });
   };
 
-  const sendToApi = ({
+  const handleSendToApi = async () => {
+    try {
+      await sendToApi({ message, isFollowUp: false });
+
+      await sendToApi({
+        message:
+          "for the below message what can be the follow-up questions, give a list of possible questions that a user might come up with. Each item in the list should start with an asterisk." +
+          messages[messages.length - 1]!.message,
+        isFollowUp: true,
+      });
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  const sendToApi = async ({
     message,
     isFollowUp,
   }: {
@@ -86,44 +101,52 @@ function Chat({
     const context =
       "You are 'Aido,' a personal intelligent healthcare advisor. Your primary role is to provide accurate and reliable information in response to personal medical queries. You are knowledgeable about various medical topics and can offer advice based on trusted sources. When responding to queries, make sure to cite reliable sources that users can refer to for verification. For example, if a user asks, 'What are some common symptoms of a cold?' you can respond with: 'Hello! Common symptoms of a cold include a runny or stuffy nose, sneezing, sore throat, and mild body aches. You can verify this information from reputable sources such as the Centers for Disease Control and Prevention (CDC) or the Mayo Clinic.' Feel free to use authoritative medical sources such as medical journals, official health organizations, and well-known medical websites to back up your responses. Remember to prioritize accuracy, empathy, and the well-being of the users seeking medical information.";
     const followUpContext =
-      "Consider the given chat history of the user and generate a list of possible follow up questions that the current user might come up with. Each item in the list should start with an asterisk.";
-    fetch("https://vertexai-api-ar2ndw3szq-uc.a.run.app/query", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        message,
-        context: isFollowUp ? followUpContext : context,
-        history: messages.map((msg) => {
-          return {
-            author: msg.author,
-            message: msg.message,
-          };
-        }),
-      }),
-    })
-      .then((res) => res.text())
-      .then((text) => {
-        isFollowUp
-          ? setFollowUp(
-              text
-                .trim()
-                .split("\n")
-                .map((question) => question.trim().substring(2))
-            )
-          : setMessages((prev) => [
-              ...prev,
-              {
-                type,
-                author: "bot",
-                message: text,
-              },
-            ]);
-        !isFollowUp && createMes(JSON.stringify(text), "bot");
-        !isFollowUp && botConversationTrigger(text);
-      })
-      .catch((error) => console.error("Error:", error));
+      "Consider the previous question asked by the user and generate a list of possible follow-up questions that the current user might come up with. Each item in the list should start with an asterisk.";
+
+    try {
+      const response = await fetch(
+        `https://vertexai-api-ar2ndw3szq-uc.a.run.app/${type}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            message,
+            context: isFollowUp ? followUpContext : context,
+            history: messages.map((msg) => {
+              return {
+                author: msg.author,
+                message: msg.message,
+              };
+            }),
+          }),
+        }
+      );
+
+      const text = await response.text();
+
+      if (isFollowUp) {
+        setFollowUp(
+          text
+            .trim()
+            .split("\n")
+            .map((question) => question.trim().substring(2))
+        );
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          {
+            type,
+            author: "bot",
+            message: text,
+          },
+        ]);
+        createMes(JSON.stringify(text), "bot");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
   };
 
   const messagesEndRef = useRef(null);
@@ -131,7 +154,7 @@ function Chat({
   const scrollToBottom = () => {
     if (messagesEndRef.current)
       (messagesEndRef.current as HTMLDivElement).scrollIntoView({
-        behavior: "smooth",
+        behavior: "auto",
       });
   };
 
@@ -140,8 +163,10 @@ function Chat({
   }, [messages, getAllMessages.isSuccess, createMessage.isSuccess]);
 
   const socketRef = useRef<WebSocket | null>(null);
-
+  const [isRecording, setIsRecording] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState("en-US");
+  const [transcript, setTranscript] = useState<string[]>([]);
+  [];
 
   async function transcribe() {
     console.log("Started transcription");
@@ -155,9 +180,10 @@ function Chat({
         });
 
         const webSocketUrl =
-          selectedLanguage == "en-US"
+          selectedLanguage === "en-US"
             ? "wss://api.deepgram.com/v1/listen?model=nova"
-            : `wss://api.deepgram.com/v1/listen?language=${selectedLanguage}`;
+            : `wss://api.deepgram.com/v1/listen?language=${selectedLanguage}` +
+              selectedLanguage;
 
         const socket = new WebSocket(webSocketUrl, [
           "token",
@@ -178,7 +204,12 @@ function Chat({
           const received = message && JSON.parse(message?.data as string);
           const transcript = received.channel?.alternatives[0]
             .transcript as string;
-          console.log(transcript);
+          setTranscript((prev) => {
+            if (!prev.some((item) => item === transcript)) {
+              return [...prev, transcript];
+            }
+            return prev;
+          });
         };
 
         socket.onclose = () => {
@@ -192,6 +223,20 @@ function Chat({
         socketRef.current = socket;
       });
   }
+
+  useEffect(() => {
+    if (isRecording) {
+      console.log(transcript, "dusfh");
+
+      setMessage("");
+      // eslint-disable-next-line
+      transcribe();
+    } else {
+      console.log(transcript);
+      setMessage(transcript.join(" "));
+      setTranscript([]);
+    }
+  }, [isRecording]);
 
   return (
     <div className="w-[300px] max-w-xl flex-grow overflow-hidden p-1 lg:w-[400px]">
@@ -255,7 +300,7 @@ function Chat({
             className="mr-2 rounded-l-lg border py-2 pr-10"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={(e) => {
+            onKeyDown={async (e) => {
               if (e.key === "Enter" && !e.shiftKey && message.trim() !== "") {
                 e.preventDefault();
                 setMessages((prev) => [
@@ -267,26 +312,34 @@ function Chat({
                   },
                 ]);
                 createMes(message, "user");
-                sendToApi({ message, isFollowUp: false });
-                sendToApi({
-                  message:
-                    "Generate an array of strings consisting of possible follow up questions by the user.",
-                  isFollowUp: true,
-                });
+                await handleSendToApi();
               }
             }}
           />
           <div className="flex flex-col space-y-1">
-            <Button>
-              <Mic
-                className="h-5 w-5"
-                onClick={async () => {
-                  await transcribe();
-                }}
-              />
+            <Button
+              onClick={async () => {
+                if (isRecording) {
+                  socketRef.current?.close(),
+                    await navigator.mediaDevices
+                      .getUserMedia({ audio: true })
+                      .then((stream) => {
+                        stream.getTracks().forEach((track) => track.stop());
+                      });
+                  setIsRecording(false);
+                } else {
+                  setIsRecording(true);
+                }
+              }}
+            >
+              {isRecording ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Mic className="h-5 w-5" />
+              )}
             </Button>
             <Button
-              onClick={() => {
+              onClick={async () => {
                 if (message.trim() !== "") {
                   setMessages((prev) => [
                     ...prev,
@@ -297,7 +350,7 @@ function Chat({
                     },
                   ]);
                   createMes(message, "user");
-                  sendToApi({ message, isFollowUp: false });
+                  await sendToApi({ message, isFollowUp: false });
                 }
               }}
               disabled={

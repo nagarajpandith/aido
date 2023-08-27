@@ -13,7 +13,7 @@ import { Environment, OrbitControls, useTexture } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
 import Avatar from "src/components/3d/avatar1";
 import axios from "axios";
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
 interface MessageQueue {
   lipSync: object;
   audio: HTMLAudioElement;
@@ -25,7 +25,6 @@ export default function Home() {
   };
   const [messageQueue, setMessageQueue] = useState<MessageQueue[]>([]);
   const botConversationTrigger = async (msg: string) => {
-    console.log(msg);
     const url = `/api/speech?text=${encodeURIComponent(msg)}`;
     const blob = await (await fetch(url)).blob();
     const audio = new Audio(URL.createObjectURL(blob));
@@ -41,8 +40,36 @@ export default function Home() {
         },
       }
     );
-    setMessageQueue((prev) => [...prev, { lipSync: data, audio: audio }]);
+    setMessageQueue((prev) => [{ lipSync: data, audio: audio }, ...prev]);
   };
+
+  const [currentMessage, setCurrentMessage] = useState<MessageQueue | null>(
+    null
+  );
+
+  useEffect(() => {
+    if (!currentMessage && messageQueue.length > 0) {
+      const { audio, lipSync } = messageQueue[0]!;
+      setCurrentMessage({ audio, lipSync });
+
+      audio.addEventListener("ended", () => {
+        setCurrentMessage(null);
+        setMessageQueue((prev) => prev.slice(1));
+      });
+    }
+    if (
+      currentMessage?.audio &&
+      currentMessage.audio.ended &&
+      messageQueue.length > 0
+    ) {
+      const { audio, lipSync } = messageQueue[0]!;
+      setCurrentMessage({ audio, lipSync });
+      audio.addEventListener("ended", () => {
+        setCurrentMessage(null);
+        setMessageQueue((prev) => prev.slice(1));
+      });
+    }
+  }, [messageQueue]);
 
   return (
     <>
@@ -59,7 +86,9 @@ export default function Home() {
           <Canvas shadows camera={{ position: [0, 0, 8], fov: 43 }}>
             <color attach="background" args={["#ececec"]} />
             <OrbitControls />
-            <Avatar groupConfig={groupConfig} />
+            {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+            {/* @ts-ignore */}
+            <Avatar currentMessage={currentMessage} groupConfig={groupConfig} />
             <Environment preset="apartment" />
             <Scean />
           </Canvas>

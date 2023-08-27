@@ -29,7 +29,7 @@ export default function Avatar1(props) {
   );
   const { animations: talkingAnimation } = useFBX("/assets/animations/talking.fbx");
   idleAnimation[0].name = "Idle";
-  talkingAnimation[0].name = "Angry";
+  talkingAnimation[0].name = "Speech";
   greetingAnimation[0].name = "Greeting";
   const [animation, setAnimation] = useState("Idle");
 
@@ -45,15 +45,22 @@ export default function Avatar1(props) {
   useEffect(() => {
     console.log(nodes.Wolf3D_Head.morphTargetDictionary);
   }, [nodes]);
+  const [playAudio, setPlayAudio] = useState(false);
+  useEffect(() => {
+    if (props.currentMessage?.audio && !props.currentMessage.audio.ended) {
+      setPlayAudio(true);
+    } else {
 
+      setPlayAudio(false);
+    }
+  }, [props.currentMessage?.audio]);
   const {
-    playAudio,
     script,
     headFollow,
     smoothMorphTarget,
     morphTargetSmoothing,
   } = {
-    playAudio: false,
+    playAudio: true,
     headFollow: true,
     smoothMorphTarget: true,
     morphTargetSmoothing: 0.5,
@@ -62,12 +69,14 @@ export default function Avatar1(props) {
       options: ["speech", "Idle", "Greeting"],
     },
   };
-  // log morph targets dictionary
-
-  const audio = useMemo(() => new Audio(`/${script}.mp3`), [script]);
-  const jsonFile = useLoader(THREE.FileLoader, `/lip.json`);
-  const lipsync = JSON.parse(jsonFile);
+  console.log(props.currentMessage)
+  const audio = props.currentMessage?.audio;
+  const lipsync = props.currentMessage?.lipSync;
   useFrame(() => {
+    if (!audio || !lipsync) {
+      setAnimation("Idle");
+      return;
+    }
     const currentAudioTime = audio.currentTime;
     if (audio.paused || audio.ended) {
       setAnimation("Idle");
@@ -163,16 +172,19 @@ export default function Avatar1(props) {
     nodes.Wolf3D_Teeth.morphTargetInfluences[
       nodes.Wolf3D_Teeth.morphTargetDictionary["viseme_I"]
     ] = 1;
-    if (playAudio) {
+    if (audio) {
       audio.play();
       if (script === "welcome") {
         setAnimation("Greeting");
       } else {
-        setAnimation("Angry");
+        setAnimation("Speech");
       }
     } else {
       setAnimation("Idle");
-      audio.pause();
+      if (audio) {
+        audio.pause();
+      }
+
     }
   }, [playAudio, script]);
 
