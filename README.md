@@ -21,6 +21,9 @@
 - Personalised medical query & mental health support 
 - Multilingual Voice Chat Support
 
+## Architecture
+![image](https://github.com/nagarajpandith/aido-client/assets/83623339/bfe71acf-7b0a-497a-9c9a-4023ba835823)
+
 ## Tech Stack
 - Google PaLM2 based on model chat-bison using Google vertex AI
 - Deployed both client & server on Google Cloud Run
@@ -38,7 +41,6 @@
 ![6](https://github.com/nagarajpandith/aido-client/assets/83623339/f259b79e-7cec-48ed-88bf-c75c647f5a61)
 ![7](https://github.com/nagarajpandith/aido-client/assets/83623339/88cff44a-f68a-4dfc-8173-62b696387708)
 ![8](https://github.com/nagarajpandith/aido-client/assets/83623339/a925f607-f0be-4c32-9766-bb04ca311547)
-
 
 ## Challenges Faced
 - No finetuning available for chat-bison model
