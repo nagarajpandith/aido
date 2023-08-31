@@ -6,8 +6,8 @@
 <img src="https://github.com/nagarajpandith/aido-client/assets/83623339/a36de8a0-41f1-43bf-93b4-51e2516d046d" width="500" />
 
 - [Live URL](https://aido-ar2ndw3szq-uc.a.run.app/)
-- Backend was built with Flask -- [Backend Repo](https://github.com/NidheeshaT/aido-server)
-- Both client & server were dockerized & deployed on [Google Cloud Run](https://cloud.google.com/run)
+- VertexAi API Microservice was built with Flask -- [Repo](https://github.com/NidheeshaT/vertexai-api)
+- Both of the repos were dockerized & deployed on [Google Cloud Run](https://cloud.google.com/run)
 - [Final Presentation Pitch Deck](https://www.canva.com/design/DAFstFPq9mU/VrI2Bq1hMvutvrdiTBLdRw/view?utm_content=DAFstFPq9mU&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink)
 
 > **NOTE**
